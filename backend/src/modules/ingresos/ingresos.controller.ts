@@ -34,5 +34,6 @@ export async function eliminar(req: AuthRequest, res: Response): Promise<void> {
 
 export async function resumen(req: AuthRequest, res: Response): Promise<void> {
   const mes = (req.query.mes as string) || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-  res.json(await svc.resumenIngresos(mes));
+  const usuarioId = req.query.usuarioId as string | undefined;
+  res.json(await svc.resumenIngresos(mes, usuarioId));
 }

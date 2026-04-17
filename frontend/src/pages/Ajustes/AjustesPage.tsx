@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { User, Lock, Bell, Tag, BarChart2, Download, MessageCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { User, Lock, Tag, BarChart2, Download, MessageCircle, Camera } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Avatar } from '../../components/ui/Avatar';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
@@ -57,6 +57,7 @@ function PerfilTab() {
     email: usuario?.email || '',
   });
   const [passForm, setPassForm] = useState({ passwordActual: '', passwordNueva: '', confirmar: '' });
+  const fotoRef = useRef<HTMLInputElement>(null);
 
   const handleGuardar = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,6 +70,23 @@ function PerfilTab() {
       setTimeout(() => setSuccess(''), 3000);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error');
+    } finally { setLoading(false); }
+  };
+
+  const handleSubirFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLoading(true);
+    setError('');
+    try {
+      const formData = new FormData();
+      formData.append('foto', file);
+      const updated = await apiClient.upload<typeof usuario>('/auth/perfil/foto', formData);
+      if (updated) actualizarUsuario(updated as any);
+      setSuccess('Foto actualizada');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error al subir foto');
     } finally { setLoading(false); }
   };
 
@@ -96,10 +114,20 @@ function PerfilTab() {
 
       <Card>
         <div className="flex items-center gap-4 mb-5">
-          {usuario && <Avatar nombre={usuario.nombre} color={usuario.avatarColor} size="lg" />}
+          <div className="relative">
+            {usuario && <Avatar nombre={usuario.nombre} color={usuario.avatarColor} avatarUrl={usuario.avatarUrl} size="lg" />}
+            <button onClick={() => fotoRef.current?.click()}
+              className="absolute -bottom-1 -right-1 w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center hover:bg-indigo-700 transition-colors">
+              <Camera className="w-3 h-3 text-white" />
+            </button>
+            <input ref={fotoRef} type="file" accept="image/*" className="hidden" onChange={handleSubirFoto} />
+          </div>
           <div>
             <p className="font-semibold text-slate-900">{usuario?.nombre}</p>
             <p className="text-sm text-slate-400">{usuario?.email}</p>
+            <button onClick={() => fotoRef.current?.click()} className="text-xs text-indigo-500 hover:underline mt-0.5">
+              Cambiar foto
+            </button>
           </div>
         </div>
 

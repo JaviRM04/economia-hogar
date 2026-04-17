@@ -33,6 +33,21 @@ export async function liquidarDeuda(id: string) {
   });
 }
 
+export async function editarDeuda(id: string, data: { importe?: number; concepto?: string }) {
+  return prisma.deuda.update({
+    where: { id },
+    data,
+    include: {
+      deudor: { select: { id: true, nombre: true, avatarColor: true } },
+      acreedor: { select: { id: true, nombre: true, avatarColor: true } },
+    },
+  });
+}
+
+export async function eliminarDeuda(id: string) {
+  return prisma.deuda.delete({ where: { id } });
+}
+
 export async function pagoParcial(id: string, importePagado: number) {
   const deuda = await prisma.deuda.findUniqueOrThrow({ where: { id } });
   if (deuda.estado === 'LIQUIDADA') throw new Error('La deuda ya está liquidada');

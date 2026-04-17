@@ -6,6 +6,7 @@ export interface Usuario {
   email: string;
   telegramId: string | null;
   avatarColor: string;
+  avatarUrl: string | null;
   ahorroActual: number;
   createdAt: string;
 }

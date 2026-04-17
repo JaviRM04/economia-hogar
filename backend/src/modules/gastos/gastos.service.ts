@@ -79,13 +79,13 @@ export async function eliminarGasto(id: string, usuarioId: string) {
   return prisma.gasto.delete({ where: { id } });
 }
 
-export async function resumenMes(mes: string) {
+export async function resumenMes(mes: string, usuarioId?: string) {
   const [anio, mesNum] = mes.split('-').map(Number);
   const inicio = new Date(anio, mesNum - 1, 1);
   const fin = new Date(anio, mesNum, 1);
 
   const gastos = await prisma.gasto.findMany({
-    where: { fecha: { gte: inicio, lt: fin } },
+    where: { fecha: { gte: inicio, lt: fin }, ...(usuarioId ? { usuarioId } : {}) },
     include: { usuario: { select: { id: true, nombre: true } } },
   });
 

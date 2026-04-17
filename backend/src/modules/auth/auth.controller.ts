@@ -67,3 +67,14 @@ export async function listarUsuarios(_req: Request, res: Response): Promise<void
   const usuarios = await authService.obtenerUsuarios();
   res.json(usuarios);
 }
+
+export async function subirFoto(req: AuthRequest, res: Response): Promise<void> {
+  if (!req.file) { res.status(400).json({ error: 'No se recibió ninguna imagen' }); return; }
+  try {
+    const avatarUrl = `/uploads/${req.file.filename}`;
+    const usuario = await authService.actualizarPerfil(req.usuarioId!, { avatarUrl });
+    res.json(usuario);
+  } catch (e: unknown) {
+    res.status(400).json({ error: e instanceof Error ? e.message : 'Error al subir foto' });
+  }
+}

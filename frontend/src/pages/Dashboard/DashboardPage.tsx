@@ -2,15 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   TrendingUp, TrendingDown, Wallet, Users, ChevronRight,
-  Calendar, Target, AlertTriangle
+  Calendar, Target, X
 } from 'lucide-react';
 import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip,
-  ResponsiveContainer, Legend
+  ResponsiveContainer, Legend, AreaChart, Area
 } from 'recharts';
 import { Card } from '../../components/ui/Card';
+import { Modal } from '../../components/ui/Modal';
 import { ProgressBar } from '../../components/ui/ProgressBar';
 import { Avatar } from '../../components/ui/Avatar';
+import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { PageLoader } from '../../components/ui/LoadingSpinner';
 import { useAuth } from '../../store/auth';
 import { apiClient } from '../../services/api';
@@ -54,6 +56,8 @@ export function DashboardPage() {
   const [facturas, setFacturas] = useState<FacturaRecurrente[]>([]);
   const [metas, setMetas] = useState<Meta[]>([]);
   const [deudas, setDeudas] = useState<Deuda[]>([]);
+  const [resumenUsuario, setResumenUsuario] = useState<{ usuario: UsuarioInfo; gastos: any; ingresos: any } | null>(null);
+  const [loadingResumen, setLoadingResumen] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -74,6 +78,17 @@ export function DashboardPage() {
       setDeudas(debs.filter((d: Deuda) => d.estado === 'PENDIENTE'));
     }).finally(() => setLoading(false));
   }, [mesActual]);
+
+  const abrirResumenUsuario = async (u: UsuarioInfo) => {
+    setLoadingResumen(true);
+    try {
+      const [gastos, ingresos] = await Promise.all([
+        apiClient.get<any>(`/gastos/resumen?mes=${mesActual}&usuarioId=${u.id}`),
+        apiClient.get<any>(`/ingresos/resumen?mes=${mesActual}&usuarioId=${u.id}`),
+      ]);
+      setResumenUsuario({ usuario: u, gastos, ingresos });
+    } finally { setLoadingResumen(false); }
+  };
 
   if (loading) return <PageLoader />;
 
@@ -164,20 +179,22 @@ export function DashboardPage() {
         </Card>
       </div>
 
-      {/* Gastos por persona */}
+      {/* Gastos por persona — clickables */}
       {usuarios.length > 0 && resumenGastos && (
         <div className="grid grid-cols-2 gap-4">
           {usuarios.map(u => (
-            <Card key={u.id}>
-              <div className="flex items-center gap-3 mb-2">
-                <Avatar nombre={u.nombre} color={u.avatarColor} size="sm" />
-                <p className="font-medium text-slate-900 text-sm">{u.nombre}</p>
-              </div>
-              <p className="text-xl font-bold text-slate-900">
-                {formatCurrency(resumenGastos.porUsuario[u.id] || 0)}
-              </p>
-              <p className="text-xs text-slate-400 mt-0.5">gastado este mes</p>
-            </Card>
+            <button key={u.id} onClick={() => abrirResumenUsuario(u)} className="text-left">
+              <Card className="hover:shadow-md hover:border-indigo-200 transition-all cursor-pointer active:scale-95">
+                <div className="flex items-center gap-3 mb-2">
+                  <Avatar nombre={u.nombre} color={u.avatarColor} size="sm" />
+                  <p className="font-medium text-slate-900 text-sm">{u.nombre}</p>
+                </div>
+                <p className="text-xl font-bold text-slate-900">
+                  {formatCurrency(resumenGastos.porUsuario[u.id] || 0)}
+                </p>
+                <p className="text-xs text-indigo-400 mt-0.5">ver resumen →</p>
+              </Card>
+            </button>
           ))}
         </div>
       )}
@@ -314,6 +331,109 @@ export function DashboardPage() {
             })}
           </div>
         </Card>
+      )}
+      {/* Modal resumen usuario */}
+      <Modal
+        open={!!resumenUsuario || loadingResumen}
+        onClose={() => setResumenUsuario(null)}
+        title={resumenUsuario ? `Resumen de ${resumenUsuario.usuario.nombre}` : 'Cargando...'}
+      >
+        {loadingResumen ? (
+          <div className="flex items-center justify-center py-10"><LoadingSpinner size="lg" /></div>
+        ) : resumenUsuario ? (
+          <ResumenUsuarioModal
+            usuario={resumenUsuario.usuario}
+            gastos={resumenUsuario.gastos}
+            ingresos={resumenUsuario.ingresos}
+            mes={mesActual}
+          />
+        ) : null}
+      </Modal>
+    </div>
+  );
+}
+
+function ResumenUsuarioModal({ usuario, gastos, ingresos, mes }: {
+  usuario: UsuarioInfo;
+  gastos: ResumenGastos;
+  ingresos: ResumenIngresos;
+  mes: string;
+}) {
+  const balance = (ingresos?.total || 0) - (gastos?.total || 0);
+  const mesLabel = new Date(mes + '-01').toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+
+  const categoriasData = Object.entries(gastos?.porCategoria || {})
+    .filter(([, v]) => (v as number) > 0)
+    .sort(([, a], [, b]) => (b as number) - (a as number))
+    .map(([cat, val]) => ({
+      cat,
+      val: val as number,
+      label: CATEGORIA_GASTO_LABELS[cat as keyof typeof CATEGORIA_GASTO_LABELS]?.label || cat,
+      emoji: CATEGORIA_GASTO_LABELS[cat as keyof typeof CATEGORIA_GASTO_LABELS]?.emoji || '📦',
+      color: CATEGORIA_GASTO_LABELS[cat as keyof typeof CATEGORIA_GASTO_LABELS]?.color || '#94a3b8',
+    }));
+
+  return (
+    <div className="space-y-5">
+      <p className="text-sm text-slate-400 capitalize">{mesLabel}</p>
+
+      {/* KPIs */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="p-3 bg-green-50 rounded-xl text-center">
+          <p className="text-xs text-green-600 font-medium">Ingresos</p>
+          <p className="text-lg font-bold text-green-700">{formatCurrency(ingresos?.total || 0)}</p>
+        </div>
+        <div className="p-3 bg-red-50 rounded-xl text-center">
+          <p className="text-xs text-red-500 font-medium">Gastos</p>
+          <p className="text-lg font-bold text-red-600">{formatCurrency(gastos?.total || 0)}</p>
+        </div>
+        <div className={`p-3 rounded-xl text-center ${balance >= 0 ? 'bg-indigo-50' : 'bg-orange-50'}`}>
+          <p className={`text-xs font-medium ${balance >= 0 ? 'text-indigo-600' : 'text-orange-500'}`}>Balance</p>
+          <p className={`text-lg font-bold ${balance >= 0 ? 'text-indigo-700' : 'text-orange-600'}`}>{formatCurrency(balance)}</p>
+        </div>
+      </div>
+
+      {/* Gastos comunes vs individuales */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="p-3 bg-slate-50 rounded-xl">
+          <p className="text-xs text-slate-500">Gastos comunes</p>
+          <p className="text-base font-bold text-slate-900">{formatCurrency(gastos?.totalComun || 0)}</p>
+        </div>
+        <div className="p-3 bg-slate-50 rounded-xl">
+          <p className="text-xs text-slate-500">Gastos individuales</p>
+          <p className="text-base font-bold text-slate-900">{formatCurrency((gastos?.total || 0) - (gastos?.totalComun || 0))}</p>
+        </div>
+      </div>
+
+      {/* Por categoría */}
+      {categoriasData.length > 0 && (
+        <div>
+          <p className="text-sm font-semibold text-slate-900 mb-3">Por categoría</p>
+          <div className="space-y-2">
+            {categoriasData.map(({ cat, val, label, emoji, color }) => {
+              const pct = gastos?.total > 0 ? Math.round((val / gastos.total) * 100) : 0;
+              return (
+                <div key={cat} className="flex items-center gap-3">
+                  <span className="text-base w-6 text-center">{emoji}</span>
+                  <div className="flex-1">
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm text-slate-700">{label}</span>
+                      <span className="text-sm font-medium text-slate-900">{formatCurrency(val)}</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-1.5 rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
+                    </div>
+                  </div>
+                  <span className="text-xs text-slate-400 w-8 text-right">{pct}%</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {categoriasData.length === 0 && (
+        <p className="text-sm text-slate-400 text-center py-4">Sin gastos este mes</p>
       )}
     </div>
   );

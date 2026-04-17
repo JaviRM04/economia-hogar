@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, CheckCircle, SplitSquareHorizontal } from 'lucide-react';
+import { Plus, CheckCircle, SplitSquareHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Modal } from '../../components/ui/Modal';
 import { Avatar } from '../../components/ui/Avatar';
@@ -26,6 +26,9 @@ export function DeudasPage() {
   const [pagoParcialId, setPagoParcialId] = useState<string | null>(null);
   const [importeParcial, setImporteParcial] = useState('');
   const [loadingParcial, setLoadingParcial] = useState(false);
+  const [editando, setEditando] = useState<Deuda | null>(null);
+  const [editForm, setEditForm] = useState({ importe: '', concepto: '' });
+  const [loadingEdit, setLoadingEdit] = useState(false);
 
   const cargar = async () => {
     setLoading(true);
@@ -46,6 +49,22 @@ export function DeudasPage() {
 
   const handleLiquidar = async (id: string) => {
     await apiClient.post(`/deudas/${id}/liquidar`, {});
+    cargar();
+  };
+
+  const handleEditar = async () => {
+    if (!editando) return;
+    setLoadingEdit(true);
+    try {
+      await apiClient.put(`/deudas/${editando.id}`, { importe: Number(editForm.importe), concepto: editForm.concepto });
+      setEditando(null);
+      cargar();
+    } finally { setLoadingEdit(false); }
+  };
+
+  const handleEliminar = async (id: string) => {
+    if (!confirm('¿Eliminar esta deuda del historial?')) return;
+    await apiClient.delete(`/deudas/${id}`);
     cargar();
   };
 
@@ -137,7 +156,17 @@ export function DeudasPage() {
                     <p className="font-bold text-red-500 text-lg ml-2">{formatCurrency(d.importe)}</p>
                   </div>
                   <div className="flex items-center justify-between mt-2">
-                    <span className="text-xs text-slate-400">{formatDate(d.fechaDeuda)}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-slate-400">{formatDate(d.fechaDeuda)}</span>
+                      <button onClick={() => { setEditando(d); setEditForm({ importe: String(d.importe), concepto: d.concepto }); }}
+                        className="p-1 rounded-lg hover:bg-slate-100 text-slate-300 hover:text-slate-500">
+                        <Pencil className="w-3 h-3" />
+                      </button>
+                      <button onClick={() => handleEliminar(d.id)}
+                        className="p-1 rounded-lg hover:bg-red-50 text-slate-300 hover:text-red-400">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
                     {d.estado === 'PENDIENTE' ? (
                       <div className="flex items-center gap-2">
                         {pagoParcialId === d.id ? (
@@ -180,6 +209,29 @@ export function DeudasPage() {
           ))}
         </div>
       )}
+
+      {/* Modal editar deuda */}
+      <Modal open={!!editando} onClose={() => setEditando(null)} title="Editar deuda">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Importe (€)</label>
+            <input type="number" value={editForm.importe} onChange={e => setEditForm(f => ({ ...f, importe: e.target.value }))}
+              className="input-field" step="0.01" required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Concepto</label>
+            <input type="text" value={editForm.concepto} onChange={e => setEditForm(f => ({ ...f, concepto: e.target.value }))}
+              className="input-field" required />
+          </div>
+          <div className="flex gap-3 pt-2">
+            <button onClick={() => setEditando(null)} className="btn-secondary flex-1">Cancelar</button>
+            <button onClick={handleEditar} disabled={loadingEdit}
+              className="btn-primary flex-1 flex items-center justify-center gap-2">
+              {loadingEdit ? <LoadingSpinner size="sm" /> : 'Guardar'}
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       <Modal open={showForm} onClose={() => setShowForm(false)} title="Nueva deuda">
         <DeudaForm

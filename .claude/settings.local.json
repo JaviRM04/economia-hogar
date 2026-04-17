@@ -58,7 +58,12 @@
       "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{const r=JSON.parse\\(c.join\\(''\\)\\); console.log\\(r.status\\)}\\)\")",
       "Bash(npx tsx *)",
       "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{const r=JSON.parse\\(c.join\\(''\\)\\); console.log\\('Deploy:', r.id, r.status\\)}\\)\")",
-      "Bash(grep -v \"^$\")"
+      "Bash(grep -v \"^$\")",
+      "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{const r=JSON.parse\\(c.join\\(''\\)\\); console.log\\(r.id, r.status\\)}\\)\")",
+      "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{const r=JSON.parse\\(c.join\\(''\\)\\); console.log\\('TelegramId:', r.telegramId\\)}\\)\")",
+      "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{const r=JSON.parse\\(c.join\\(''\\)\\); console.log\\('Categoría creada:', r.id, r.nombre, r.emoji\\)}\\)\")",
+      "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{const r=JSON.parse\\(c.join\\(''\\)\\); console.log\\('Gasto creado:', r.descripcion, r.importe+'€', r.tipo\\)}\\)\")",
+      "Bash(git commit *)"
     ]
   }
 }
