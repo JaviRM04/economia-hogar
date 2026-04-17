@@ -90,18 +90,6 @@ export function LoginPage() {
             </button>
           </form>
 
-          {/* Credenciales demo */}
-          <div className="mt-6 p-3 bg-slate-50 rounded-xl">
-            <p className="text-xs text-slate-500 font-medium mb-2">Cuentas de demo:</p>
-            <div className="space-y-1">
-              <button onClick={() => { setEmail('javi@demo.com'); setPassword('demo1234'); }} className="text-xs text-indigo-600 hover:underline block">
-                javi@demo.com / demo1234
-              </button>
-              <button onClick={() => { setEmail('ana@demo.com'); setPassword('demo1234'); }} className="text-xs text-indigo-600 hover:underline block">
-                ana@demo.com / demo1234
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
