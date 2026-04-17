@@ -3,6 +3,18 @@ import * as svc from './usuarios.service';
 import { AuthRequest } from '../../middleware/auth';
 import { CATEGORIAS_GASTO } from '../gastos/gastos.types';
 
+export async function obtenerAhorros(_req: AuthRequest, res: Response): Promise<void> {
+  res.json(await svc.obtenerAhorros());
+}
+
+export async function actualizarAhorro(req: AuthRequest, res: Response): Promise<void> {
+  const { importe } = req.body;
+  if (typeof importe !== 'number' || importe < 0) {
+    res.status(400).json({ error: 'Importe inválido' }); return;
+  }
+  res.json(await svc.actualizarAhorro(req.usuarioId!, importe));
+}
+
 export async function obtenerPresupuestos(req: AuthRequest, res: Response): Promise<void> {
   const mes = (req.query.mes as string) || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
   res.json(await svc.resumenPresupuestos(req.usuarioId!, mes));

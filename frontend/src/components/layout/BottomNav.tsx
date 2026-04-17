@@ -1,29 +1,32 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, CreditCard, TrendingUp, Target, Settings } from 'lucide-react';
+import { LayoutDashboard, CreditCard, TrendingUp, Calendar, Users, Target, PiggyBank, Settings } from 'lucide-react';
 
 const navItems = [
-  { to: '/',         icon: LayoutDashboard, label: 'Inicio' },
-  { to: '/gastos',   icon: CreditCard,      label: 'Gastos' },
-  { to: '/ingresos', icon: TrendingUp,      label: 'Ingresos' },
-  { to: '/metas',    icon: Target,          label: 'Metas' },
-  { to: '/ajustes',  icon: Settings,        label: 'Ajustes' },
+  { to: '/',          icon: LayoutDashboard, label: 'Inicio' },
+  { to: '/gastos',    icon: CreditCard,      label: 'Gastos' },
+  { to: '/ingresos',  icon: TrendingUp,      label: 'Ingresos' },
+  { to: '/facturas',  icon: Calendar,        label: 'Facturas' },
+  { to: '/deudas',    icon: Users,           label: 'Deudas' },
+  { to: '/ahorro',    icon: PiggyBank,       label: 'Ahorro' },
+  { to: '/metas',     icon: Target,          label: 'Metas' },
+  { to: '/ajustes',   icon: Settings,        label: 'Ajustes' },
 ];
 
 export function BottomNav() {
   return (
     <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur-md border-t border-slate-100 z-20"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-      <div className="flex items-center justify-around px-2 py-2">
+      <div className="flex items-center overflow-x-auto scrollbar-none px-1 py-2 gap-1">
         {navItems.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
             end={to === '/'}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-150 ${
+              `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-150 flex-shrink-0 min-w-[58px] ${
                 isActive
-                  ? 'text-indigo-600'
+                  ? 'text-indigo-600 bg-indigo-50'
                   : 'text-slate-400'
               }`
             }

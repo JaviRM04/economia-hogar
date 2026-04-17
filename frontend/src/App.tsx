@@ -9,6 +9,7 @@ import { IngresosPage } from './pages/Ingresos/IngresosPage';
 import { FacturasPage } from './pages/Facturas/FacturasPage';
 import { DeudasPage } from './pages/Deudas/DeudasPage';
 import { MetasPage } from './pages/Metas/MetasPage';
+import { AhorroPage } from './pages/Ahorro/AhorroPage';
 import { AjustesPage } from './pages/Ajustes/AjustesPage';
 import { PageLoader } from './components/ui/LoadingSpinner';
 
@@ -35,6 +36,7 @@ function AppRoutes() {
         <Route path="/facturas" element={<FacturasPage />} />
         <Route path="/deudas" element={<DeudasPage />} />
         <Route path="/metas" element={<MetasPage />} />
+        <Route path="/ahorro" element={<AhorroPage />} />
         <Route path="/ajustes" element={<AjustesPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -7,7 +7,7 @@ function generarToken(id: string, nombre: string): string {
   return jwt.sign({ id, nombre }, process.env.JWT_SECRET!, { expiresIn: '30d' });
 }
 
-function omitirPassword(usuario: { id: string; nombre: string; email: string; password: string; telegramId: string | null; avatarColor: string; createdAt: Date; updatedAt: Date }) {
+function omitirPassword(usuario: any) {
   const { password: _, ...resto } = usuario;
   return resto;
 }

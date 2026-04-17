@@ -20,6 +20,8 @@ model Usuario {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  ahorroActual             Decimal  @default(0)
+
   gastos                   Gasto[]
   ingresos                 Ingreso[]
   facturasCreadas          FacturaRecurrente[] @relation("FacturaCreada")

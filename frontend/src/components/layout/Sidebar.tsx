@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, CreditCard, TrendingUp, Calendar,
-  Users, Target, Settings, LogOut, Wallet
+  Users, Target, PiggyBank, Settings, LogOut, Wallet
 } from 'lucide-react';
 import { useAuth } from '../../store/auth';
 import { Avatar } from '../ui/Avatar';
@@ -14,6 +14,7 @@ const navItems = [
   { to: '/facturas',  icon: Calendar,        label: 'Facturas' },
   { to: '/deudas',    icon: Users,           label: 'Deudas' },
   { to: '/metas',     icon: Target,          label: 'Metas' },
+  { to: '/ahorro',    icon: PiggyBank,       label: 'Ahorro' },
   { to: '/ajustes',   icon: Settings,        label: 'Ajustes' },
 ];
 

@@ -1,6 +1,23 @@
 import { prisma } from '../../lib/prisma';
 import { CATEGORIAS_GASTO, CategoriaGasto } from '../gastos/gastos.types';
 
+export async function obtenerAhorros() {
+  const usuarios = await prisma.usuario.findMany({
+    select: { id: true, nombre: true, avatarColor: true, ahorroActual: true },
+    orderBy: { createdAt: 'asc' },
+  });
+  return usuarios.map(u => ({ ...u, ahorroActual: Number(u.ahorroActual) }));
+}
+
+export async function actualizarAhorro(usuarioId: string, importe: number) {
+  const usuario = await prisma.usuario.update({
+    where: { id: usuarioId },
+    data: { ahorroActual: importe },
+    select: { id: true, nombre: true, avatarColor: true, ahorroActual: true },
+  });
+  return { ...usuario, ahorroActual: Number(usuario.ahorroActual) };
+}
+
 export async function obtenerPresupuestos(usuarioId: string) {
   return prisma.presupuesto.findMany({ where: { usuarioId } });
 }
