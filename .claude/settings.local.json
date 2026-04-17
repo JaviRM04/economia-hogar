@@ -31,7 +31,10 @@
       "Bash(winget list *)",
       "Read(//c/Program Files/**)",
       "Read(//c/Users/javir/AppData/Local/Programs/**)",
-      "Read(//c/Users/javir/**)"
+      "Read(//c/Users/javir/**)",
+      "Bash(npx supabase *)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:2%3FnVKvGM*F*qy_p@db.qjuxwjtzpsqxsclfhpha.supabase.co:5432/postgres\" DIRECT_URL=\"postgresql://postgres:2%3FnVKvGM*F*qy_p@db.qjuxwjtzpsqxsclfhpha.supabase.co:5432/postgres\" npx prisma migrate deploy)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:2%3FnVKvGM%2AF%2Aqy_p@db.qjuxwjtzpsqxsclfhpha.supabase.co:5432/postgres?sslmode=require\" DIRECT_URL=\"postgresql://postgres:2%3FnVKvGM%2AF%2Aqy_p@db.qjuxwjtzpsqxsclfhpha.supabase.co:5432/postgres?sslmode=require\" npx prisma migrate deploy)"
     ]
   }
 }

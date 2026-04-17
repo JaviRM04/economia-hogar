@@ -5,6 +5,7 @@ interface ProgressBarProps {
   color?: string;
   height?: string;
   showLabel?: boolean;
+  className?: string;
 }
 
 export function ProgressBar({ value, color, height = 'h-2', showLabel = false }: ProgressBarProps) {

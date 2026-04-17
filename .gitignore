@@ -6,9 +6,8 @@
 node_modules/
 */node_modules/
 
-# Build
-dist/
-*/dist/
+# Build (excepto frontend/dist que se sube para producción)
+backend/dist/
 build/
 
 # Prisma
