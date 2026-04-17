@@ -145,41 +145,84 @@ function TelegramTab() {
   const [telegramId, setTelegramId] = useState(usuario?.telegramId || '');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+
+  const vinculado = !!usuario?.telegramId;
 
   const handleGuardar = async () => {
+    if (!telegramId.trim()) { setError('Introduce tu Telegram ID'); return; }
     setLoading(true);
+    setError('');
     try {
-      const updated = await apiClient.put<typeof usuario>('/auth/perfil', { telegramId });
+      const updated = await apiClient.put<typeof usuario>('/auth/perfil', { telegramId: telegramId.trim() });
       if (updated) actualizarUsuario(updated as any);
-      setSuccess('Telegram ID guardado');
+      setSuccess('Telegram vinculado correctamente');
       setTimeout(() => setSuccess(''), 3000);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error al guardar');
+    } finally { setLoading(false); }
+  };
+
+  const handleDesvincular = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const updated = await apiClient.put<typeof usuario>('/auth/perfil', { telegramId: null });
+      if (updated) actualizarUsuario(updated as any);
+      setTelegramId('');
+      setSuccess('Telegram desvinculado');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error');
     } finally { setLoading(false); }
   };
 
   return (
     <Card>
       <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
-        <MessageCircle className="w-4 h-4 text-blue-500" /> Configuración de Telegram
+        <MessageCircle className="w-4 h-4 text-blue-500" /> Vinculación con Telegram
       </h3>
-      {success && <div className="mb-3 p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-600">{success}</div>}
 
+      {success && <div className="mb-3 p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-600">{success}</div>}
+      {error && <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">{error}</div>}
+
+      {/* Estado actual */}
+      <div className={`flex items-center gap-3 p-4 rounded-xl mb-5 ${vinculado ? 'bg-green-50 border border-green-200' : 'bg-slate-50 border border-slate-200'}`}>
+        <div className={`w-2.5 h-2.5 rounded-full ${vinculado ? 'bg-green-500' : 'bg-slate-300'}`} />
+        <div className="flex-1">
+          <p className={`text-sm font-medium ${vinculado ? 'text-green-700' : 'text-slate-500'}`}>
+            {vinculado ? 'Cuenta vinculada' : 'Sin vincular'}
+          </p>
+          {vinculado && <p className="text-xs text-green-600 mt-0.5">ID: {usuario?.telegramId}</p>}
+        </div>
+        {vinculado && (
+          <button onClick={handleDesvincular} disabled={loading}
+            className="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded-lg hover:bg-red-50">
+            Desvincular
+          </button>
+        )}
+      </div>
+
+      {/* Instrucciones */}
       <div className="p-4 bg-blue-50 rounded-xl mb-4 text-sm text-blue-700">
-        <p className="font-medium mb-1">Cómo obtener tu Telegram ID:</p>
-        <ol className="list-decimal list-inside space-y-1">
+        <p className="font-medium mb-2">Cómo obtener tu Telegram ID:</p>
+        <ol className="list-decimal list-inside space-y-1.5">
           <li>Abre Telegram y busca <strong>@userinfobot</strong></li>
           <li>Escríbele cualquier mensaje</li>
           <li>Te responderá con tu ID numérico</li>
+          <li>Pégalo aquí y pulsa Vincular</li>
         </ol>
+        <p className="mt-3 text-blue-600 text-xs">Una vez vinculado, el bot te reconocerá automáticamente y podrás registrar gastos, consultar saldos y más.</p>
       </div>
 
       <div className="space-y-3">
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1.5">Tu Telegram ID</label>
           <input type="text" value={telegramId} onChange={e => setTelegramId(e.target.value)}
-            className="input-field" placeholder="Ej: 123456789" />
+            className="input-field" placeholder="Ej: 123456789" inputMode="numeric" />
         </div>
         <button onClick={handleGuardar} className="btn-primary flex items-center justify-center gap-2 w-full" disabled={loading}>
-          {loading ? <LoadingSpinner size="sm" /> : 'Guardar Telegram ID'}
+          {loading ? <LoadingSpinner size="sm" /> : (vinculado ? 'Actualizar Telegram ID' : 'Vincular con Telegram')}
         </button>
       </div>
     </Card>
