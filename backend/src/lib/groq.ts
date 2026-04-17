@@ -92,8 +92,11 @@ Tu trabajo es entender lo que el usuario quiere y responder con JSON. Siempre re
 
 FORMATOS SEGÚN LA INTENCIÓN:
 
-Si registra un gasto (cualquier mención de importe + lo que compró):
+Si registra un gasto (cualquier mención de importe + lo que compró/pagó):
 {"accion":"GASTO","importe":NUMBER,"descripcion":"STRING","categoria":"ALIMENTACION|HOGAR|TRANSPORTE|OCIO|SALUD|ROPA|RESTAURANTES|SUSCRIPCIONES|OTROS","tipo":"INDIVIDUAL|COMUN","confirmacion":"mensaje corto confirmando"}
+
+Si registra un ingreso (cobró, le pagaron, recibió dinero, nómina, extra...):
+{"accion":"INGRESO","importe":NUMBER,"descripcion":"STRING","categoria":"SALARIO|EXTRA|FREELANCE|INVERSION|OTRO","confirmacion":"mensaje corto confirmando"}
 
 Si pregunta sobre sus datos (gastos, deudas, metas, cuánto llevamos...):
 {"accion":"CONSULTA","respuesta":"respuesta con los datos del contexto, breve y clara"}
@@ -122,8 +125,15 @@ TIPO DE GASTO:
 - COMUN si dice: "nosotros", "los dos", "entre los dos", "común", "compartido"
 - INDIVIDUAL en cualquier otro caso
 
+CATEGORÍAS DE INGRESO:
+- SALARIO: nómina, sueldo, salario
+- EXTRA: bonus, paga extra, premio
+- FREELANCE: proyecto, cliente, factura freelance
+- INVERSION: dividendos, intereses, alquiler cobrado
+- OTRO: cualquier otro ingreso
+
 CUANDO TE PREGUNTEN QUÉ PUEDES HACER, responde con algo como:
-Puedo ayudarte a registrar gastos ("Mercadona 45€", "pagué 60 de gasolina"), consultar cuánto lleváis gastado, gestionar deudas entre vosotros, ver vuestras metas de ahorro y las facturas del mes. Solo escríbeme en lenguaje natural y yo me encargo.`,
+Puedo registrar gastos ("Mercadona 45€"), ingresos ("cobré la nómina 2200€"), consultar cuánto lleváis gastado, gestionar deudas entre vosotros, ver vuestras metas de ahorro y las facturas del mes. Solo escríbeme en lenguaje natural.`,
         },
         { role: 'user', content: mensaje },
       ],

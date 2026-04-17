@@ -9,13 +9,27 @@ export async function obtenerAhorros() {
   return usuarios.map(u => ({ ...u, ahorroActual: Number(u.ahorroActual) }));
 }
 
-export async function actualizarAhorro(usuarioId: string, importe: number) {
-  const usuario = await prisma.usuario.update({
-    where: { id: usuarioId },
-    data: { ahorroActual: importe },
-    select: { id: true, nombre: true, avatarColor: true, ahorroActual: true },
-  });
+export async function actualizarAhorro(usuarioId: string, importe: number, nota?: string) {
+  const [usuario] = await prisma.$transaction([
+    prisma.usuario.update({
+      where: { id: usuarioId },
+      data: { ahorroActual: importe },
+      select: { id: true, nombre: true, avatarColor: true, ahorroActual: true },
+    }),
+    prisma.historialAhorro.create({
+      data: { usuarioId, importe, nota: nota || null },
+    }),
+  ]);
   return { ...usuario, ahorroActual: Number(usuario.ahorroActual) };
+}
+
+export async function obtenerHistorialAhorro(usuarioId: string) {
+  const historial = await prisma.historialAhorro.findMany({
+    where: { usuarioId },
+    orderBy: { fecha: 'asc' },
+    take: 30,
+  });
+  return historial.map(h => ({ ...h, importe: Number(h.importe) }));
 }
 
 export async function obtenerPresupuestos(usuarioId: string) {

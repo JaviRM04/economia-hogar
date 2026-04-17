@@ -8,11 +8,15 @@ export async function obtenerAhorros(_req: AuthRequest, res: Response): Promise<
 }
 
 export async function actualizarAhorro(req: AuthRequest, res: Response): Promise<void> {
-  const { importe } = req.body;
+  const { importe, nota } = req.body;
   if (typeof importe !== 'number' || importe < 0) {
     res.status(400).json({ error: 'Importe inválido' }); return;
   }
-  res.json(await svc.actualizarAhorro(req.usuarioId!, importe));
+  res.json(await svc.actualizarAhorro(req.usuarioId!, importe, nota));
+}
+
+export async function obtenerHistorialAhorro(req: AuthRequest, res: Response): Promise<void> {
+  res.json(await svc.obtenerHistorialAhorro(req.usuarioId!));
 }
 
 export async function obtenerPresupuestos(req: AuthRequest, res: Response): Promise<void> {

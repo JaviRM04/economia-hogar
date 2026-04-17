@@ -7,6 +7,7 @@ router.use(autenticar);
 
 router.get('/ahorro', ctrl.obtenerAhorros);
 router.put('/ahorro', ctrl.actualizarAhorro);
+router.get('/ahorro/historial', ctrl.obtenerHistorialAhorro);
 router.get('/presupuestos', ctrl.obtenerPresupuestos);
 router.put('/presupuestos', ctrl.upsertPresupuesto);
 router.delete('/presupuestos/:categoria', ctrl.eliminarPresupuesto);

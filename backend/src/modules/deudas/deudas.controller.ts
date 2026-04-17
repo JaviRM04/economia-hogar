@@ -21,6 +21,13 @@ export async function liquidar(req: AuthRequest, res: Response): Promise<void> {
   } catch { res.status(404).json({ error: 'Deuda no encontrada' }); }
 }
 
+export async function pagoParcial(req: AuthRequest, res: Response): Promise<void> {
+  const importePagado = Number(req.body.importePagado);
+  try {
+    res.json(await svc.pagoParcial(req.params.id, importePagado));
+  } catch (e: unknown) { res.status(400).json({ error: e instanceof Error ? e.message : 'Error' }); }
+}
+
 export async function balance(_req: AuthRequest, res: Response): Promise<void> {
   res.json(await svc.balanceNeto());
 }

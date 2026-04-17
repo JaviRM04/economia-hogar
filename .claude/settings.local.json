@@ -34,7 +34,31 @@
       "Read(//c/Users/javir/**)",
       "Bash(npx supabase *)",
       "Bash(DATABASE_URL=\"postgresql://postgres:2%3FnVKvGM*F*qy_p@db.qjuxwjtzpsqxsclfhpha.supabase.co:5432/postgres\" DIRECT_URL=\"postgresql://postgres:2%3FnVKvGM*F*qy_p@db.qjuxwjtzpsqxsclfhpha.supabase.co:5432/postgres\" npx prisma migrate deploy)",
-      "Bash(DATABASE_URL=\"postgresql://postgres:2%3FnVKvGM%2AF%2Aqy_p@db.qjuxwjtzpsqxsclfhpha.supabase.co:5432/postgres?sslmode=require\" DIRECT_URL=\"postgresql://postgres:2%3FnVKvGM%2AF%2Aqy_p@db.qjuxwjtzpsqxsclfhpha.supabase.co:5432/postgres?sslmode=require\" npx prisma migrate deploy)"
+      "Bash(DATABASE_URL=\"postgresql://postgres:2%3FnVKvGM%2AF%2Aqy_p@db.qjuxwjtzpsqxsclfhpha.supabase.co:5432/postgres?sslmode=require\" DIRECT_URL=\"postgresql://postgres:2%3FnVKvGM%2AF%2Aqy_p@db.qjuxwjtzpsqxsclfhpha.supabase.co:5432/postgres?sslmode=require\" npx prisma migrate deploy)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\)[0]; print\\(d['deploy']['status'], d['deploy']['id'], d['deploy'].get\\('finishedAt','in progress'\\)\\)\")",
+      "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{const r=JSON.parse\\(c.join\\(''\\)\\); console.log\\(r.status, r.finishedAt||'in progress'\\)}\\)\")",
+      "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{const r=JSON.parse\\(c.join\\(''\\)\\); console.log\\(r.status, r.finishedAt\\)}\\)\")",
+      "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{const r=JSON.parse\\(c.join\\(''\\)\\); r.logs?.forEach\\(l=>console.log\\(l.timestamp, l.message\\)\\)}\\)\")",
+      "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{try{const r=JSON.parse\\(c.join\\(''\\)\\); \\(r.logs||r\\).forEach\\(l=>console.log\\(l.message||l\\)\\)}catch\\(e\\){console.log\\(c.join\\(''\\).slice\\(0,2000\\)\\)}}\\)\")",
+      "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{try{const r=JSON.parse\\(c.join\\(''\\)\\); \\(r.logs||[]\\).slice\\(-50\\).forEach\\(l=>console.log\\(l.message\\)\\)}catch\\(e\\){console.log\\(c.join\\(''\\).slice\\(0,3000\\)\\)}}\\)\")",
+      "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{try{const r=JSON.parse\\(c.join\\(''\\)\\); console.log\\(JSON.stringify\\(r.service?.serviceDetails||r,null,2\\)\\)}catch\\(e\\){console.log\\(c.join\\(''\\).slice\\(0,1000\\)\\)}}\\)\")",
+      "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{const r=JSON.parse\\(c.join\\(''\\)\\); console.log\\('Deploy ID:', r.id, 'Status:', r.status\\)}\\)\")",
+      "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{const arr=JSON.parse\\(c.join\\(''\\)\\); arr.forEach\\(d=>console.log\\(d.deploy.id, d.deploy.status, d.deploy.createdAt\\)\\)}\\)\")",
+      "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{const r=JSON.parse\\(c.join\\(''\\)\\); console.log\\(JSON.stringify\\(r,null,2\\)\\)}\\)\")",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(start *)",
+      "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{console.log\\(c.join\\(''\\)\\)}\\)\")",
+      "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{const r=JSON.parse\\(c.join\\(''\\)\\); console.log\\(JSON.stringify\\(r\\)\\)}\\)\")",
+      "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{const r=JSON.parse\\(c.join\\(''\\)\\)[0].deploy; console.log\\('Status:', r.status, '\\\\nCommit:', r.commit.message.split\\('\\\\n'\\)[0], '\\\\nIniciado:', r.createdAt\\)}\\)\")",
+      "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{const arr=JSON.parse\\(c.join\\(''\\)\\); arr.forEach\\(d=>console.log\\(d.deploy.status, d.deploy.commit.id.slice\\(0,7\\), d.deploy.createdAt\\)\\)}\\)\")",
+      "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{const r=JSON.parse\\(c.join\\(''\\)\\); console.log\\('ID:', r.id, '| Status:', r.status, '| Commit:', r.commit.id.slice\\(0,7\\)\\)}\\)\")",
+      "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{const r=JSON.parse\\(c.join\\(''\\)\\); console.log\\(r.status\\)}\\)\")",
+      "Bash(npx tsx *)",
+      "Bash(node -e \"const c=[]; process.stdin.on\\('data',d=>c.push\\(d\\)\\); process.stdin.on\\('end',\\(\\)=>{const r=JSON.parse\\(c.join\\(''\\)\\); console.log\\('Deploy:', r.id, r.status\\)}\\)\")",
+      "Bash(grep -v \"^$\")"
     ]
   }
 }

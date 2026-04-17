@@ -213,6 +213,22 @@ export function iniciarBot(): Bot | null {
         await ctx.reply(String(accion.respuesta));
         break;
 
+      case 'INGRESO': {
+        try {
+          await prisma.ingreso.create({
+            data: {
+              importe: Number(accion.importe),
+              descripcion: String(accion.descripcion),
+              categoria: String(accion.categoria || 'OTRO'),
+              usuarioId: usuario.id,
+              fecha: new Date(),
+            },
+          });
+          await ctx.reply(String(accion.confirmacion));
+        } catch { await ctx.reply('No pude registrar el ingreso. Inténtalo de nuevo.'); }
+        break;
+      }
+
       case 'DEUDA': {
         try {
           const otros = await prisma.usuario.findMany({ where: { id: { not: usuario.id } } });
@@ -247,6 +263,59 @@ export function iniciarBot(): Bot | null {
   });
 
   bot.catch((err) => { console.error('Error en bot:', err); });
+
+  // ── Resumen semanal automático (domingos ~20:00 hora España) ─────────────
+  let ultimoResumenEnviado = '';
+
+  setInterval(async () => {
+    const ahora = new Date();
+    const esHoraEspana = ahora.toLocaleString('es-ES', { timeZone: 'Europe/Madrid', weekday: 'short', hour: '2-digit' });
+    const esDomingo = esHoraEspana.startsWith('dom');
+    const hora = ahora.toLocaleString('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', hour12: false }).replace(' h', '');
+    const esHora20 = hora === '20';
+    const hoy = ahora.toISOString().split('T')[0];
+
+    if (!esDomingo || !esHora20 || ultimoResumenEnviado === hoy) return;
+    ultimoResumenEnviado = hoy;
+
+    const groupId = process.env.TELEGRAM_GROUP_ID;
+    if (!groupId || !bot) return;
+
+    try {
+      const hoyDate = new Date();
+      const lunesDate = new Date(hoyDate);
+      lunesDate.setDate(hoyDate.getDate() - 6);
+      lunesDate.setHours(0, 0, 0, 0);
+
+      const [gastosSemana, ingresosSemana, deudasPendientes] = await Promise.all([
+        prisma.gasto.findMany({
+          where: { fecha: { gte: lunesDate, lte: hoyDate } },
+          include: { usuario: { select: { nombre: true } } },
+        }),
+        prisma.ingreso.findMany({
+          where: { fecha: { gte: lunesDate, lte: hoyDate } },
+          include: { usuario: { select: { nombre: true } } },
+        }),
+        prisma.deuda.findMany({
+          where: { estado: 'PENDIENTE' },
+          include: { deudor: { select: { nombre: true } }, acreedor: { select: { nombre: true } } },
+        }),
+      ]);
+
+      const totalGastos = gastosSemana.reduce((acc, g) => acc + Number(g.importe), 0);
+      const totalIngresos = ingresosSemana.reduce((acc, g) => acc + Number(g.importe), 0);
+
+      const porUsuarioGastos: Record<string, number> = {};
+      gastosSemana.forEach(g => { porUsuarioGastos[g.usuario.nombre] = (porUsuarioGastos[g.usuario.nombre] || 0) + Number(g.importe); });
+
+      const resumenGastos = Object.entries(porUsuarioGastos).map(([n, t]) => `  • ${n}: ${eur(t)}`).join('\n') || '  • Ninguno';
+      const resumenDeudas = deudasPendientes.length === 0 ? '✅ Sin deudas pendientes' : deudasPendientes.map(d => `  • ${d.deudor.nombre} → ${d.acreedor.nombre}: ${eur(Number(d.importe))}`).join('\n');
+
+      const mensaje = `📊 *Resumen semanal*\n\n*Gastos esta semana: ${eur(totalGastos)}*\n${resumenGastos}\n\n*Ingresos: ${eur(totalIngresos)}*\n\n*Deudas pendientes:*\n${resumenDeudas}`;
+
+      await bot.api.sendMessage(groupId, mensaje, { parse_mode: 'Markdown' });
+    } catch (e) { console.error('[Bot] Error enviando resumen semanal:', e); }
+  }, 60 * 60 * 1000); // comprueba cada hora
 
   return bot;
 }

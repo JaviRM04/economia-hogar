@@ -33,6 +33,32 @@ export async function liquidarDeuda(id: string) {
   });
 }
 
+export async function pagoParcial(id: string, importePagado: number) {
+  const deuda = await prisma.deuda.findUniqueOrThrow({ where: { id } });
+  if (deuda.estado === 'LIQUIDADA') throw new Error('La deuda ya está liquidada');
+  const restante = Number(deuda.importe) - importePagado;
+  if (importePagado <= 0 || importePagado >= Number(deuda.importe)) {
+    throw new Error('El importe parcial debe ser mayor que 0 y menor que el total');
+  }
+
+  return prisma.$transaction([
+    // Liquidar la deuda original
+    prisma.deuda.update({
+      where: { id },
+      data: { estado: 'LIQUIDADA', fechaLiquidacion: new Date() },
+    }),
+    // Crear nueva deuda por el restante
+    prisma.deuda.create({
+      data: {
+        importe: restante,
+        concepto: `${deuda.concepto} (pendiente tras pago parcial de ${importePagado.toFixed(2)}€)`,
+        deudorId: deuda.deudorId,
+        acreedorId: deuda.acreedorId,
+      },
+    }),
+  ]);
+}
+
 export async function balanceNeto() {
   const usuarios = await prisma.usuario.findMany({ select: { id: true, nombre: true, avatarColor: true } });
   const deudas = await prisma.deuda.findMany({ where: { estado: 'PENDIENTE' } });

@@ -9,5 +9,6 @@ router.get('/', ctrl.listar);
 router.get('/balance', ctrl.balance);
 router.post('/', ctrl.crear);
 router.post('/:id/liquidar', ctrl.liquidar);
+router.post('/:id/pago-parcial', ctrl.pagoParcial);
 
 export default router;

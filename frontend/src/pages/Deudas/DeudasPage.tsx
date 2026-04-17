@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, CheckCircle } from 'lucide-react';
+import { Plus, CheckCircle, SplitSquareHorizontal } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Modal } from '../../components/ui/Modal';
 import { Avatar } from '../../components/ui/Avatar';
@@ -23,6 +23,9 @@ export function DeudasPage() {
   const [balance, setBalance] = useState<BalanceNeto | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [verHistorial, setVerHistorial] = useState(false);
+  const [pagoParcialId, setPagoParcialId] = useState<string | null>(null);
+  const [importeParcial, setImporteParcial] = useState('');
+  const [loadingParcial, setLoadingParcial] = useState(false);
 
   const cargar = async () => {
     setLoading(true);
@@ -44,6 +47,18 @@ export function DeudasPage() {
   const handleLiquidar = async (id: string) => {
     await apiClient.post(`/deudas/${id}/liquidar`, {});
     cargar();
+  };
+
+  const handlePagoParcial = async (id: string) => {
+    const importe = parseFloat(importeParcial.replace(',', '.'));
+    if (isNaN(importe) || importe <= 0) return;
+    setLoadingParcial(true);
+    try {
+      await apiClient.post(`/deudas/${id}/pago-parcial`, { importePagado: importe });
+      setPagoParcialId(null);
+      setImporteParcial('');
+      cargar();
+    } finally { setLoadingParcial(false); }
   };
 
   return (
@@ -124,10 +139,35 @@ export function DeudasPage() {
                   <div className="flex items-center justify-between mt-2">
                     <span className="text-xs text-slate-400">{formatDate(d.fechaDeuda)}</span>
                     {d.estado === 'PENDIENTE' ? (
-                      <button onClick={() => handleLiquidar(d.id)}
-                        className="flex items-center gap-1.5 text-xs bg-green-50 text-green-600 px-3 py-1.5 rounded-full hover:bg-green-100 transition-colors font-medium">
-                        <CheckCircle className="w-3.5 h-3.5" /> Liquidar
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {pagoParcialId === d.id ? (
+                          <div className="flex items-center gap-1.5">
+                            <div className="relative">
+                              <input type="number" value={importeParcial} onChange={e => setImporteParcial(e.target.value)}
+                                className="w-24 text-xs border border-slate-200 rounded-lg px-2 py-1.5 pr-5 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                                placeholder="0" step="0.01" autoFocus />
+                              <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">€</span>
+                            </div>
+                            <button onClick={() => handlePagoParcial(d.id)} disabled={loadingParcial}
+                              className="text-xs bg-amber-500 text-white px-2 py-1.5 rounded-lg hover:bg-amber-600">
+                              {loadingParcial ? '...' : 'OK'}
+                            </button>
+                            <button onClick={() => { setPagoParcialId(null); setImporteParcial(''); }}
+                              className="text-xs text-slate-400 hover:text-slate-600 px-1 py-1.5">✕</button>
+                          </div>
+                        ) : (
+                          <>
+                            <button onClick={() => { setPagoParcialId(d.id); setImporteParcial(''); }}
+                              className="flex items-center gap-1 text-xs bg-amber-50 text-amber-600 px-2 py-1.5 rounded-full hover:bg-amber-100 transition-colors font-medium">
+                              <SplitSquareHorizontal className="w-3 h-3" /> Parcial
+                            </button>
+                            <button onClick={() => handleLiquidar(d.id)}
+                              className="flex items-center gap-1.5 text-xs bg-green-50 text-green-600 px-3 py-1.5 rounded-full hover:bg-green-100 transition-colors font-medium">
+                              <CheckCircle className="w-3.5 h-3.5" /> Liquidar
+                            </button>
+                          </>
+                        )}
+                      </div>
                     ) : (
                       <span className="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full">
                         ✓ Liquidada {d.fechaLiquidacion ? formatDate(d.fechaLiquidacion) : ''}
