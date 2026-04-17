@@ -1,0 +1,180 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── Usuarios ────────────────────────────────────────────────────────────────
+
+model Usuario {
+  id          String   @id @default(cuid())
+  nombre      String
+  email       String   @unique
+  password    String
+  telegramId  String?  @unique
+  avatarColor String   @default("#6366f1")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  gastos                   Gasto[]
+  ingresos                 Ingreso[]
+  facturasCreadas          FacturaRecurrente[] @relation("FacturaCreada")
+  facturasAfectadas        FacturaRecurrente[] @relation("FacturaAfectada")
+  deudasDeuda              Deuda[]             @relation("DeudaDeudor")
+  deudasAcreedor           Deuda[]             @relation("DeudaAcreedor")
+  metas                    Meta[]
+  aportaciones             Aportacion[]
+  presupuestos             Presupuesto[]
+  categoriasPersonalizadas CategoriaPersonalizada[]
+}
+
+// ─── Categorías personalizadas ────────────────────────────────────────────────
+
+model CategoriaPersonalizada {
+  id        String   @id @default(cuid())
+  nombre    String
+  emoji     String   @default("📦")
+  tipo      String   // "GASTO" | "INGRESO"
+  color     String   @default("#6366f1")
+  usuarioId String
+  createdAt DateTime @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  gastos  Gasto[]
+}
+
+// ─── Gastos ──────────────────────────────────────────────────────────────────
+
+model Gasto {
+  id                String   @id @default(cuid())
+  importe           Decimal
+  descripcion       String
+  categoria         String   @default("OTROS")   // CategoriaGasto
+  categoriaCustomId String?
+  tipo              String   @default("INDIVIDUAL") // TipoGasto
+  fecha             DateTime @default(now())
+  ticketUrl         String?
+  usuarioId         String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  usuario         Usuario                 @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  categoriaCustom CategoriaPersonalizada? @relation(fields: [categoriaCustomId], references: [id])
+}
+
+// ─── Ingresos ─────────────────────────────────────────────────────────────────
+
+model Ingreso {
+  id          String   @id @default(cuid())
+  importe     Decimal
+  descripcion String
+  categoria   String   @default("SALARIO")  // CategoriaIngreso
+  fecha       DateTime @default(now())
+  usuarioId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+}
+
+// ─── Facturas recurrentes ─────────────────────────────────────────────────────
+
+model FacturaRecurrente {
+  id          String   @id @default(cuid())
+  nombre      String
+  importe     Decimal
+  diaMes      Int
+  categoria   String   @default("OTROS")  // CategoriaGasto
+  tipo        String   @default("COMUN")  // TipoGasto
+  activa      Boolean  @default(true)
+  creadaPorId String
+  afectaAId   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  creadaPor Usuario  @relation("FacturaCreada", fields: [creadaPorId], references: [id])
+  afectaA   Usuario? @relation("FacturaAfectada", fields: [afectaAId], references: [id])
+  pagos     PagoFactura[]
+}
+
+model PagoFactura {
+  id        String    @id @default(cuid())
+  facturaId String
+  mes       Int
+  anio      Int
+  pagada    Boolean   @default(false)
+  fechaPago DateTime?
+  createdAt DateTime  @default(now())
+
+  factura FacturaRecurrente @relation(fields: [facturaId], references: [id], onDelete: Cascade)
+
+  @@unique([facturaId, mes, anio])
+}
+
+// ─── Deudas internas ──────────────────────────────────────────────────────────
+
+model Deuda {
+  id               String    @id @default(cuid())
+  importe          Decimal
+  concepto         String
+  estado           String    @default("PENDIENTE") // "PENDIENTE" | "LIQUIDADA"
+  deudorId         String
+  acreedorId       String
+  fechaDeuda       DateTime  @default(now())
+  fechaLiquidacion DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  deudor   Usuario @relation("DeudaDeudor", fields: [deudorId], references: [id])
+  acreedor Usuario @relation("DeudaAcreedor", fields: [acreedorId], references: [id])
+}
+
+// ─── Metas de ahorro ──────────────────────────────────────────────────────────
+
+model Meta {
+  id              String    @id @default(cuid())
+  nombre          String
+  emoji           String    @default("🎯")
+  importeObjetivo Decimal
+  importeActual   Decimal   @default(0)
+  fechaLimite     DateTime?
+  estado          String    @default("ACTIVA") // "ACTIVA" | "COMPLETADA" | "PAUSADA"
+  usuarioId       String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  usuario      Usuario      @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  aportaciones Aportacion[]
+}
+
+model Aportacion {
+  id        String   @id @default(cuid())
+  metaId    String
+  importe   Decimal
+  nota      String?
+  usuarioId String
+  fecha     DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  meta    Meta    @relation(fields: [metaId], references: [id], onDelete: Cascade)
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+}
+
+// ─── Presupuestos por categoría ───────────────────────────────────────────────
+
+model Presupuesto {
+  id        String   @id @default(cuid())
+  categoria String   // CategoriaGasto
+  importe   Decimal
+  usuarioId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioId, categoria])
+}

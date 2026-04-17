@@ -1,0 +1,41 @@
+# Entorno
+.env
+.env.local
+
+# Dependencias
+node_modules/
+*/node_modules/
+
+# Build
+dist/
+*/dist/
+build/
+
+# Prisma
+backend/src/generated/
+
+# SQLite
+*.db
+*.db-journal
+
+# Usage tracking
+backend/data/
+
+# Uploads
+backend/uploads/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# TypeScript
+*.tsbuildinfo

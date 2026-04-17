@@ -1,0 +1,66 @@
+version: '3.9'
+
+services:
+  # ─── Base de datos ───────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: economia_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: economia
+      POSTGRES_PASSWORD: economia
+      POSTGRES_DB: economia
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U economia"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ─── Backend ─────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: economia_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://economia:economia@postgres:5432/economia
+      JWT_SECRET: ${JWT_SECRET:-dev_secret_change_in_production}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_GROUP_ID: ${TELEGRAM_GROUP_ID:-}
+      TELEGRAM_USER1_ID: ${TELEGRAM_USER1_ID:-}
+      TELEGRAM_USER2_ID: ${TELEGRAM_USER2_ID:-}
+      TELEGRAM_USER1_NAME: ${TELEGRAM_USER1_NAME:-Usuario1}
+      TELEGRAM_USER2_NAME: ${TELEGRAM_USER2_NAME:-Usuario2}
+      NGROK_URL: ${NGROK_URL:-}
+      PORT: 3000
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      NODE_ENV: ${NODE_ENV:-development}
+    ports:
+      - "3000:3000"
+    volumes:
+      - uploads_data:/app/uploads
+
+  # ─── Frontend ────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: economia_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  postgres_data:
+  uploads_data:
