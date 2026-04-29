@@ -8,6 +8,7 @@ import { useAuth } from '../../store/auth';
 interface Props {
   gasto?: Gasto | null;
   usuarios: { id: string; nombre: string; avatarColor: string }[];
+  defaultMes?: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
@@ -18,7 +19,7 @@ const NUEVA_CATEGORIA = '__NUEVA__';
 const EMOJIS = ['🏷️','🛒','🏠','🚗','🎬','💊','👗','🍽️','📱','📦','✈️','🎓','💼','🎮','🐾','🌿','🍕','☕','🐶','💈'];
 const COLORES = ['#6366f1','#ec4899','#f59e0b','#10b981','#3b82f6','#ef4444','#8b5cf6','#f97316','#06b6d4','#84cc16'];
 
-export function GastoForm({ gasto, usuarios, onSuccess, onCancel }: Props) {
+export function GastoForm({ gasto, usuarios, defaultMes, onSuccess, onCancel }: Props) {
   const { usuario } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -43,7 +44,11 @@ export function GastoForm({ gasto, usuarios, onSuccess, onCancel }: Props) {
     importe: gasto ? String(gasto.importe) : '',
     descripcion: gasto?.descripcion || '',
     tipo: gasto?.tipo || 'INDIVIDUAL' as TipoGasto,
-    fecha: gasto ? gasto.fecha.split('T')[0] : new Date().toISOString().split('T')[0],
+    fecha: gasto ? gasto.fecha.split('T')[0] : (() => {
+      const hoy = new Date().toISOString().split('T')[0];
+      if (defaultMes && defaultMes > hoy.substring(0, 7)) return `${defaultMes}-01`;
+      return hoy;
+    })(),
     usuarioId: gasto?.usuarioId || usuario?.id || '',
   });
 

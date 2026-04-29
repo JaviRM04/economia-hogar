@@ -44,10 +44,10 @@ export function IngresosPage() {
     cargar();
   };
 
-  // Selector de meses
+  // Selector de meses (3 futuros + mes actual + 11 pasados)
   const meses: string[] = [];
   const ahora = new Date();
-  for (let i = 0; i < 12; i++) {
+  for (let i = -3; i < 12; i++) {
     const f = new Date(ahora.getFullYear(), ahora.getMonth() - i, 1);
     meses.push(`${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}`);
   }
@@ -138,6 +138,7 @@ export function IngresosPage() {
         <IngresoForm
           ingreso={editando}
           usuarios={usuarios}
+          defaultMes={mes}
           onSuccess={() => { setShowForm(false); setEditando(null); cargar(); }}
           onCancel={() => { setShowForm(false); setEditando(null); }}
         />
@@ -146,9 +147,10 @@ export function IngresosPage() {
   );
 }
 
-function IngresoForm({ ingreso, usuarios, onSuccess, onCancel }: {
+function IngresoForm({ ingreso, usuarios, defaultMes, onSuccess, onCancel }: {
   ingreso?: Ingreso | null;
   usuarios: UsuarioInfo[];
+  defaultMes?: string;
   onSuccess: () => void;
   onCancel: () => void;
 }) {
@@ -159,7 +161,11 @@ function IngresoForm({ ingreso, usuarios, onSuccess, onCancel }: {
     importe: ingreso ? String(ingreso.importe) : '',
     descripcion: ingreso?.descripcion || '',
     categoria: ingreso?.categoria || 'SALARIO' as CategoriaIngreso,
-    fecha: ingreso ? ingreso.fecha.split('T')[0] : new Date().toISOString().split('T')[0],
+    fecha: ingreso ? ingreso.fecha.split('T')[0] : (() => {
+      const hoy = new Date().toISOString().split('T')[0];
+      if (defaultMes && defaultMes > hoy.substring(0, 7)) return `${defaultMes}-01`;
+      return hoy;
+    })(),
     usuarioId: ingreso?.usuarioId || usuario?.id || '',
   });
 

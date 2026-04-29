@@ -80,7 +80,7 @@ export function GastosPage() {
 
   const meses: string[] = [];
   const ahora = new Date();
-  for (let i = 0; i < 12; i++) {
+  for (let i = -3; i < 12; i++) {
     const f = new Date(ahora.getFullYear(), ahora.getMonth() - i, 1);
     meses.push(`${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}`);
   }
@@ -247,6 +247,7 @@ export function GastosPage() {
         <GastoForm
           gasto={editando}
           usuarios={usuarios}
+          defaultMes={mes}
           onSuccess={() => { setShowForm(false); setEditando(null); cargarGastos(); }}
           onCancel={() => { setShowForm(false); setEditando(null); }}
         />
